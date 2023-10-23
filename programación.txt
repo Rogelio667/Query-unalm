@@ -12,3 +12,85 @@ and gs.estado = 'ACT'
 and abb.codigo in ('G01','G02','G03')
 and gs.fecha_fin_modular is null
 group by ca.descripcion;
+
+//Cantidad de cursos en un ciclo de posgrado segun Anexo Boletin
+select ca.descripcion ciclo,count(distinct cu.nombre)cursos
+from  aca_seccion s 
+join aca_grupo_seccion gs on s.id_grupo_seccion = gs.id 
+join aca_ciclo_academico ca on gs.id_ciclo = ca.id
+join aca_curso cu on gs.id_curso = cu.id
+join aca_anexo_boletin ab on gs.id_anexo_boletin = ab.id
+join aca_anexo_boletin abb on ab.id_anexo_superior = abb.id
+where ca.codigo in ('202300','202315','202310') 
+and s.estado = 'ACT'
+and gs.estado = 'ACT'
+and abb.codigo in ('G04')
+and gs.fecha_fin_modular is null
+group by ca.descripcion;
+
+//Profesores programados por departamento académico y por ciclo
+select ca.descripcion,upper(da.nombre)departamento,count(distinct d.id)docentes
+from aca_seccion s
+join aca_matricula_seccion ms on s.id = ms.id_seccion 
+join aca_matricula_resumen mr on ms.id_matricula_resumen = mr.id
+join aca_ciclo_academico ca on mr.id_ciclo_academico = ca.id
+join aca_modalidad_estudio me on ca.id_modalidad_estudio = me.id
+join aca_docente_seccion ds on ds.id_seccion = s.id
+join aca_docente d on ds.id_docente = d.id
+join gen_persona per on d.id_persona = per.id
+join aca_departamento_academico da on d.id_departamento_academico = da.id
+join aca_facultad fa on da.id_facultad = fa.id
+where ca.codigo in ('202300','202310','202315') and me.id = 1 
+and s.estado = 'ACT'
+group by ca.descripcion,da.nombre
+order by 1,2;
+
+//Promedio de Encuestas por Ciclo (Virtual)
+select ca.descripcion,round(sum(edm.puntaje_base10) / count(edm.id),2)prom_base_5
+from exam_encuesta_docente_modalidad edm
+join aca_ciclo_academico ca on edm.id_ciclo_academico = ca.id
+join aca_docente d on edm.id_docente = d.id
+join gen_persona p on d.id_persona = p.id
+join aca_departamento_academico da on d.id_departamento_academico = da.id
+join aca_facultad fa on da.id_facultad = fa.id
+where ca.codigo in ('202310') 
+and edm.id_modalidad_estudio = 1
+group by ca.descripcion
+order by 1,2;
+
+
+//Promedio de Encuestas por Facultades 
+select ca.descripcion,UPPER(fa.nombre) facultad,(sum(edm.puntaje_base10) / count(edm.id))prom_base_5
+from exam_encuesta_docente_modalidad edm
+join aca_ciclo_academico ca on edm.id_ciclo_academico = ca.id
+join aca_docente d on edm.id_docente = d.id
+join gen_persona p on d.id_persona = p.id
+join aca_departamento_academico da on d.id_departamento_academico = da.id
+join aca_facultad fa on da.id_facultad = fa.id
+where ca.codigo = '202310' 
+and edm.id_modalidad_estudio = 1
+group by ca.descripcion,fa.nombre
+order by 1,2;
+
+//Promedio de Encuestas por Departamentos 
+select ca.descripcion,UPPER(da.nombre) facultad,round(sum(edm.puntaje_base10) / count(edm.id),2)prom_base_5
+from exam_encuesta_docente_modalidad edm
+join aca_ciclo_academico ca on edm.id_ciclo_academico = ca.id
+join aca_docente d on edm.id_docente = d.id
+join gen_persona p on d.id_persona = p.id
+join aca_departamento_academico da on d.id_departamento_academico = da.id
+join aca_facultad fa on da.id_facultad = fa.id
+where ca.codigo = '202310' 
+and edm.id_modalidad_estudio = 1
+group by ca.descripcion,da.nombre
+order by 1,2;
+
+
+//Atenciones de requerimiento de aulas
+select ca.descripcion,count(ra.id) reservas
+from tram_reserva_aula ra 
+join tram_tramite tr on ra.id_tramite = tr.id
+join aca_ciclo_academico ca on tr.id_ciclo_academico = ca.id
+where ca.codigo in ('202300','202310','202315')
+and ra.estado <> 'ANU'
+group by ca.descripcion;
