@@ -1,5 +1,5 @@
 //Cantidad de cursos en un ciclo de pregrado segun Anexo Boletin
-select ca.descripcion ciclo,count(distinct cu.nombre)cursos
+select ca.descripcion ciclo,count(distinct cu.codigo)cursos
 from  aca_seccion s 
 join aca_grupo_seccion gs on s.id_grupo_seccion = gs.id 
 join aca_ciclo_academico ca on gs.id_ciclo = ca.id
@@ -14,7 +14,7 @@ and gs.fecha_fin_modular is null
 group by ca.descripcion;
 
 //Cantidad de cursos en un ciclo de posgrado segun Anexo Boletin
-select ca.descripcion ciclo,count(distinct cu.nombre)cursos
+select ca.descripcion ciclo,count(distinct cu.codigo)cursos
 from  aca_seccion s 
 join aca_grupo_seccion gs on s.id_grupo_seccion = gs.id 
 join aca_ciclo_academico ca on gs.id_ciclo = ca.id
